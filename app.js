@@ -1,11 +1,12 @@
 const state = {
   calibration: null,
   collecting: false,
+  paused: false,
   current: null,
-  lastMotion: null,
-  lastGps: null,
+  lastGpsPoint: null,
   gpsWatchId: null,
-  calibrationSamples: [],
+  motionBuffer: [],
+  calibrationSamples: null,
 };
 
 const els = {
@@ -16,12 +17,15 @@ const els = {
   btnPermission: document.getElementById("btnPermission"),
   btnCalibrate: document.getElementById("btnCalibrate"),
   btnStart: document.getElementById("btnStart"),
+  btnPause: document.getElementById("btnPause"),
   btnStop: document.getElementById("btnStop"),
   calibrationInfo: document.getElementById("calibrationInfo"),
   currentName: document.getElementById("currentName"),
   pointCount: document.getElementById("pointCount"),
+  segmentCount: document.getElementById("segmentCount"),
   gpsAccuracy: document.getElementById("gpsAccuracy"),
   roughnessNow: document.getElementById("roughnessNow"),
+  motionCount: document.getElementById("motionCount"),
   status: document.getElementById("status"),
   collectionsList: document.getElementById("collectionsList"),
 };
@@ -53,6 +57,29 @@ function setBadge(text, cls) {
   els.sensorBadge.className = `badge ${cls}`;
 }
 
+function mean(values) {
+  if (!values.length) return 0;
+  return values.reduce((a,b) => a + b, 0) / values.length;
+}
+
+function std(values, avg = mean(values)) {
+  if (values.length < 2) return 0;
+  const variance = values.reduce((s,v) => s + Math.pow(v - avg, 2), 0) / (values.length - 1);
+  return Math.sqrt(variance);
+}
+
+function distanceMeters(a, b) {
+  if (!a || !b) return null;
+  const R = 6371000;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLon = toRad(b.lon - a.lon);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const x = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+  return 2 * R * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
+}
+
 async function requestPermissions() {
   try {
     if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
@@ -65,8 +92,7 @@ async function requestPermissions() {
     }
 
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        state.lastGps = pos;
+      () => {
         setBadge("Sensores OK", "ok");
         els.status.textContent = "Sensores liberados. Você já pode calibrar.";
       },
@@ -85,6 +111,7 @@ async function requestPermissions() {
 function onMotion(event) {
   const acc = event.accelerationIncludingGravity || event.acceleration || {};
   const rot = event.rotationRate || {};
+
   const sample = {
     t: new Date().toISOString(),
     ax: Number(acc.x || 0),
@@ -94,40 +121,118 @@ function onMotion(event) {
     gy: Number(rot.beta || 0),
     gz: Number(rot.gamma || 0),
   };
-  state.lastMotion = sample;
 
-  if (state.calibrationSamples) state.calibrationSamples.push(sample);
-
-  if (state.collecting && state.current) {
-    addCollectionSample(sample);
+  if (state.calibrationSamples) {
+    state.calibrationSamples.push(sample);
   }
+
+  if (state.collecting && !state.paused) {
+    state.motionBuffer.push(sample);
+    els.motionCount.textContent = state.motionBuffer.length;
+  }
+}
+
+function roughnessValue(sample) {
+  const baseZ = state.calibration?.azMean ?? 9.81;
+  const idleNoise = state.calibration?.azStd ?? 0.05;
+  const verticalDelta = Math.abs(sample.az - baseZ);
+  return Math.max(0, verticalDelta - idleNoise);
+}
+
+function classByIndex(index) {
+  if (index < 0.45) return "bom";
+  if (index < 1.10) return "regular";
+  if (index < 2.00) return "ruim";
+  return "critico";
+}
+
+function summarizeBuffer() {
+  const values = state.motionBuffer.map(roughnessValue);
+  const meanVal = mean(values);
+  const maxVal = values.length ? Math.max(...values) : 0;
+  const stdVal = std(values, meanVal);
+  const peakCount = values.filter(v => v >= 2.0).length;
+
+  return {
+    sample_count: values.length,
+    roughness_mean: meanVal,
+    roughness_max: maxVal,
+    roughness_std: stdVal,
+    peak_count: peakCount,
+    roughness_index: meanVal + (stdVal * 0.5) + (peakCount > 0 ? Math.min(1, peakCount / 10) : 0),
+  };
+}
+
+function onGps(pos) {
+  const c = pos.coords;
+  els.gpsAccuracy.textContent = c.accuracy ? `${c.accuracy.toFixed(1)} m` : "---";
+
+  if (!state.collecting || state.paused || !state.current) return;
+  if (!state.motionBuffer.length) return;
+
+  const point = {
+    timestamp: new Date().toISOString(),
+    lat: c.latitude,
+    lon: c.longitude,
+    gps_accuracy_m: c.accuracy ?? null,
+    speed_mps: c.speed ?? null,
+    heading: c.heading ?? null,
+    altitude: c.altitude ?? null,
+    ...summarizeBuffer(),
+  };
+  point.classe = classByIndex(point.roughness_index);
+
+  const previous = state.lastGpsPoint;
+  state.current.points.push(point);
+
+  if (previous) {
+    const dist = distanceMeters(previous, point);
+    const validDistance = dist !== null && dist >= 1.5 && dist <= 80;
+    const validGps = (point.gps_accuracy_m ?? 999) <= 35 && (previous.gps_accuracy_m ?? 999) <= 35;
+
+    if (validDistance && validGps) {
+      const segment = {
+        timestamp_start: previous.timestamp,
+        timestamp_end: point.timestamp,
+        lat_start: previous.lat,
+        lon_start: previous.lon,
+        lat_end: point.lat,
+        lon_end: point.lon,
+        distance_m: dist,
+        speed_mps: point.speed_mps,
+        gps_accuracy_start_m: previous.gps_accuracy_m,
+        gps_accuracy_end_m: point.gps_accuracy_m,
+        sample_count: point.sample_count,
+        roughness_mean: point.roughness_mean,
+        roughness_max: point.roughness_max,
+        roughness_std: point.roughness_std,
+        peak_count: point.peak_count,
+        roughness_index: point.roughness_index,
+        classe: point.classe,
+      };
+      state.current.segments.push(segment);
+    }
+  }
+
+  state.lastGpsPoint = point;
+  state.motionBuffer = [];
+
+  els.pointCount.textContent = state.current.points.length;
+  els.segmentCount.textContent = state.current.segments.length;
+  els.roughnessNow.textContent = `${point.roughness_index.toFixed(2)} (${point.classe})`;
+  els.motionCount.textContent = "0";
+
+  saveCurrentDraft();
 }
 
 function startGpsWatch() {
   if (!("geolocation" in navigator)) return;
 
   state.gpsWatchId = navigator.geolocation.watchPosition(
-    (pos) => {
-      state.lastGps = pos;
-      const acc = pos.coords.accuracy;
-      els.gpsAccuracy.textContent = acc ? `${acc.toFixed(1)} m` : "---";
-    },
-    (err) => {
-      els.status.textContent = `GPS: ${err.message}`;
-    },
-    { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+    onGps,
+    (err) => { els.status.textContent = `GPS: ${err.message}`; },
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
   );
-}
-
-function mean(values) {
-  if (!values.length) return 0;
-  return values.reduce((a,b) => a + b, 0) / values.length;
-}
-
-function std(values, avg = mean(values)) {
-  if (values.length < 2) return 0;
-  const variance = values.reduce((s,v) => s + Math.pow(v - avg, 2), 0) / (values.length - 1);
-  return Math.sqrt(variance);
 }
 
 function calibrate() {
@@ -158,7 +263,6 @@ function calibrate() {
       azMean: mean(azs),
       azStd: std(azs),
       samples: samples.length,
-      gpsAccuracy: state.lastGps?.coords?.accuracy || null,
     };
 
     localStorage.setItem("pavimentolab_calibration", JSON.stringify(state.calibration));
@@ -168,57 +272,9 @@ function calibrate() {
   }, 15000);
 }
 
-function roughnessIndex(sample) {
-  const baseZ = state.calibration?.azMean ?? 9.81;
-  const idleNoise = state.calibration?.azStd ?? 0.05;
-  const verticalDelta = Math.abs(sample.az - baseZ);
-  const corrected = Math.max(0, verticalDelta - idleNoise);
-  return corrected;
-}
-
-function classByIndex(index) {
-  if (index < 0.45) return "bom";
-  if (index < 1.10) return "regular";
-  if (index < 2.00) return "ruim";
-  return "critico";
-}
-
-function addCollectionSample(motionSample) {
-  const gps = state.lastGps;
-  const coords = gps?.coords || {};
-  const index = roughnessIndex(motionSample);
-
-  const row = {
-    timestamp: motionSample.t,
-    lat: coords.latitude ?? null,
-    lon: coords.longitude ?? null,
-    gps_accuracy_m: coords.accuracy ?? null,
-    speed_mps: coords.speed ?? null,
-    acc_x: motionSample.ax,
-    acc_y: motionSample.ay,
-    acc_z: motionSample.az,
-    gyro_x: motionSample.gx,
-    gyro_y: motionSample.gy,
-    gyro_z: motionSample.gz,
-    roughness_index: index,
-    classe: classByIndex(index),
-  };
-
-  state.current.rows.push(row);
-  els.pointCount.textContent = state.current.rows.length;
-  els.roughnessNow.textContent = `${index.toFixed(2)} (${row.classe})`;
-
-  if (state.current.rows.length % 25 === 0) {
-    saveCurrentDraft();
-  }
-}
-
 function startCollection() {
-  if (!state.calibration) {
-    els.status.textContent = "Você pode coletar sem calibrar, mas é melhor calibrar antes. Iniciando mesmo assim.";
-  }
-
   const name = collectionName();
+
   state.current = {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
     name,
@@ -229,33 +285,80 @@ function startCollection() {
     device: "motorola_g82_android_13",
     mountPosition: els.mountPosition.value,
     calibration: state.calibration,
-    rows: [],
+    points: [],
+    segments: [],
+    pauses: [],
   };
 
   state.collecting = true;
+  state.paused = false;
+  state.lastGpsPoint = null;
+  state.motionBuffer = [];
+
   els.currentName.textContent = name;
   els.pointCount.textContent = "0";
+  els.segmentCount.textContent = "0";
+  els.motionCount.textContent = "0";
   els.btnStart.disabled = true;
+  els.btnPause.disabled = false;
+  els.btnPause.textContent = "Pausar";
   els.btnStop.disabled = false;
-  els.status.textContent = "Coletando...";
+  els.status.textContent = "Coletando. O registro é salvo a cada atualização do GPS.";
+  setBadge("Coletando", "ok");
+  saveCurrentDraft();
+}
+
+function togglePause() {
+  if (!state.current || !state.collecting) return;
+
+  state.paused = !state.paused;
+  state.motionBuffer = [];
+  state.lastGpsPoint = null;
+
+  if (state.paused) {
+    state.current.pauses.push({ start: new Date().toISOString(), end: null });
+    els.btnPause.textContent = "Retomar";
+    els.status.textContent = "Coleta pausada. Nenhum ponto ou trecho será salvo.";
+    setBadge("Pausado", "warn");
+  } else {
+    const last = state.current.pauses[state.current.pauses.length - 1];
+    if (last && !last.end) last.end = new Date().toISOString();
+    els.btnPause.textContent = "Pausar";
+    els.status.textContent = "Coleta retomada.";
+    setBadge("Coletando", "ok");
+  }
+
   saveCurrentDraft();
 }
 
 function stopCollection() {
   if (!state.current) return;
+
   state.collecting = false;
+  state.paused = false;
   state.current.endedAt = new Date().toISOString();
+
+  const lastPause = state.current.pauses[state.current.pauses.length - 1];
+  if (lastPause && !lastPause.end) lastPause.end = new Date().toISOString();
+
   saveCollection(state.current);
   localStorage.removeItem("pavimentolab_current");
+
   els.btnStart.disabled = false;
+  els.btnPause.disabled = true;
+  els.btnPause.textContent = "Pausar";
   els.btnStop.disabled = true;
   els.status.textContent = `Coleta salva: ${state.current.name}`;
+  setBadge("Salvo", "ok");
+
   state.current = null;
+  state.lastGpsPoint = null;
+  state.motionBuffer = [];
   renderCollections();
 }
 
 function storageKey() {
-  return "pavimentolab_collections";
+  return "pavimentolab_collections_v2";
 }
 
 function getCollections() {
@@ -288,9 +391,9 @@ function downloadText(filename, text, type = "text/plain") {
 
 function toCsv(collection) {
   const cols = [
-    "timestamp","lat","lon","gps_accuracy_m","speed_mps",
-    "acc_x","acc_y","acc_z","gyro_x","gyro_y","gyro_z",
-    "roughness_index","classe"
+    "timestamp","lat","lon","gps_accuracy_m","speed_mps","heading","altitude",
+    "sample_count","roughness_mean","roughness_max","roughness_std",
+    "peak_count","roughness_index","classe"
   ];
   const meta = [
     `# name=${collection.name}`,
@@ -300,16 +403,18 @@ function toCsv(collection) {
     `# vehicle=${collection.vehicle || ""}`,
     `# device=${collection.device || ""}`,
     `# mountPosition=${collection.mountPosition || ""}`,
+    `# points=${collection.points.length}`,
+    `# segments=${collection.segments.length}`,
   ];
   const lines = [cols.join(",")];
-  collection.rows.forEach(row => {
+  collection.points.forEach(row => {
     lines.push(cols.map(c => row[c] ?? "").join(","));
   });
   return meta.join("\n") + "\n" + lines.join("\n");
 }
 
-function toGeoJson(collection) {
-  const features = collection.rows
+function toPointsGeoJson(collection) {
+  const features = collection.points
     .filter(r => typeof r.lat === "number" && typeof r.lon === "number")
     .map(r => ({
       type: "Feature",
@@ -318,7 +423,11 @@ function toGeoJson(collection) {
         timestamp: r.timestamp,
         gps_accuracy_m: r.gps_accuracy_m,
         speed_mps: r.speed_mps,
-        acc_z: r.acc_z,
+        sample_count: r.sample_count,
+        roughness_mean: r.roughness_mean,
+        roughness_max: r.roughness_max,
+        roughness_std: r.roughness_std,
+        peak_count: r.peak_count,
         roughness_index: r.roughness_index,
         classe: r.classe,
         collection: collection.name,
@@ -330,7 +439,51 @@ function toGeoJson(collection) {
 
   return JSON.stringify({
     type: "FeatureCollection",
-    name: collection.name,
+    name: `${collection.name}_pontos`,
+    metadata: {
+      startedAt: collection.startedAt,
+      endedAt: collection.endedAt,
+      device: collection.device,
+      calibration: collection.calibration,
+    },
+    features
+  }, null, 2);
+}
+
+function toSegmentsGeoJson(collection) {
+  const features = collection.segments.map(s => ({
+    type: "Feature",
+    geometry: {
+      type: "LineString",
+      coordinates: [
+        [s.lon_start, s.lat_start],
+        [s.lon_end, s.lat_end]
+      ]
+    },
+    properties: {
+      timestamp_start: s.timestamp_start,
+      timestamp_end: s.timestamp_end,
+      distance_m: s.distance_m,
+      speed_mps: s.speed_mps,
+      gps_accuracy_start_m: s.gps_accuracy_start_m,
+      gps_accuracy_end_m: s.gps_accuracy_end_m,
+      sample_count: s.sample_count,
+      roughness_mean: s.roughness_mean,
+      roughness_max: s.roughness_max,
+      roughness_std: s.roughness_std,
+      peak_count: s.peak_count,
+      roughness_index: s.roughness_index,
+      classe: s.classe,
+      collection: collection.name,
+      driver: collection.driver,
+      vehicle: collection.vehicle,
+      mountPosition: collection.mountPosition,
+    }
+  }));
+
+  return JSON.stringify({
+    type: "FeatureCollection",
+    name: `${collection.name}_trechos`,
     metadata: {
       startedAt: collection.startedAt,
       endedAt: collection.endedAt,
@@ -357,8 +510,8 @@ function renderCollections() {
   }
 
   list.forEach((c) => {
-    const gpsValues = c.rows.map(r => r.gps_accuracy_m).filter(v => typeof v === "number");
-    const roughValues = c.rows.map(r => r.roughness_index).filter(v => typeof v === "number");
+    const gpsValues = c.points.map(r => r.gps_accuracy_m).filter(v => typeof v === "number");
+    const roughValues = c.points.map(r => r.roughness_index).filter(v => typeof v === "number");
     const gpsAvg = gpsValues.length ? `${mean(gpsValues).toFixed(1)} m` : "---";
     const roughAvg = roughValues.length ? mean(roughValues).toFixed(2) : "---";
 
@@ -368,13 +521,15 @@ function renderCollections() {
       <div class="itemTitle">${c.name}</div>
       <div class="itemMeta">
         Início: ${new Date(c.startedAt).toLocaleString()}<br>
-        Registros: ${c.rows.length}<br>
+        Pontos: ${c.points.length} | Trechos: ${c.segments.length}<br>
         GPS médio: ${gpsAvg}<br>
-        Índice médio: ${roughAvg}
+        Índice médio: ${roughAvg}<br>
+        Pausas: ${c.pauses?.length || 0}
       </div>
       <div class="actions">
-        <button data-csv="${c.id}">Exportar CSV</button>
-        <button data-geojson="${c.id}">Exportar GeoJSON</button>
+        <button data-csv="${c.id}">CSV pontos</button>
+        <button data-points="${c.id}">GeoJSON pontos</button>
+        <button data-segments="${c.id}">GeoJSON trechos</button>
         <button class="danger" data-delete="${c.id}">Apagar</button>
       </div>
     `;
@@ -384,14 +539,21 @@ function renderCollections() {
   els.collectionsList.querySelectorAll("[data-csv]").forEach(btn => {
     btn.addEventListener("click", () => {
       const c = getCollections().find(x => x.id === btn.dataset.csv);
-      downloadText(`${c.name}.csv`, toCsv(c), "text/csv");
+      downloadText(`${c.name}_pontos.csv`, toCsv(c), "text/csv");
     });
   });
 
-  els.collectionsList.querySelectorAll("[data-geojson]").forEach(btn => {
+  els.collectionsList.querySelectorAll("[data-points]").forEach(btn => {
     btn.addEventListener("click", () => {
-      const c = getCollections().find(x => x.id === btn.dataset.geojson);
-      downloadText(`${c.name}.geojson`, toGeoJson(c), "application/geo+json");
+      const c = getCollections().find(x => x.id === btn.dataset.points);
+      downloadText(`${c.name}_pontos.geojson`, toPointsGeoJson(c), "application/geo+json");
+    });
+  });
+
+  els.collectionsList.querySelectorAll("[data-segments]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const c = getCollections().find(x => x.id === btn.dataset.segments);
+      downloadText(`${c.name}_trechos.geojson`, toSegmentsGeoJson(c), "application/geo+json");
     });
   });
 
@@ -425,6 +587,7 @@ window.addEventListener("devicemotion", onMotion);
 els.btnPermission.addEventListener("click", requestPermissions);
 els.btnCalibrate.addEventListener("click", calibrate);
 els.btnStart.addEventListener("click", startCollection);
+els.btnPause.addEventListener("click", togglePause);
 els.btnStop.addEventListener("click", stopCollection);
 
 startGpsWatch();

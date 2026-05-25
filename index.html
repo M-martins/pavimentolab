@@ -14,7 +14,7 @@
       <div>
         <p class="eyebrow">POC de campo</p>
         <h1>PavimentoLab</h1>
-        <p class="subtitle">Coleta vibração + GPS do celular para mapear trechos bons, ruins e críticos.</p>
+        <p class="subtitle">Coleta vibração + GPS do celular para gerar pontos e trechos classificados.</p>
       </div>
       <div id="sensorBadge" class="badge warn">Aguardando</div>
     </header>
@@ -38,6 +38,7 @@
           <option value="outro">Outro</option>
         </select>
       </label>
+
       <div class="actions">
         <button id="btnPermission">Liberar sensores</button>
         <button id="btnCalibrate" class="secondary">Calibrar parado 15s</button>
@@ -49,14 +50,17 @@
       <h2>2. Coletar</h2>
       <div class="actions">
         <button id="btnStart" class="primary">Iniciar coleta</button>
-        <button id="btnStop" class="danger" disabled>Parar</button>
+        <button id="btnPause" class="secondary" disabled>Pausar</button>
+        <button id="btnStop" class="danger" disabled>Parar e salvar</button>
       </div>
 
       <div class="metrics">
         <div><span id="currentName">---</span><small>coleta</small></div>
-        <div><span id="pointCount">0</span><small>registros</small></div>
+        <div><span id="pointCount">0</span><small>pontos GPS</small></div>
+        <div><span id="segmentCount">0</span><small>trechos</small></div>
         <div><span id="gpsAccuracy">---</span><small>precisão GPS</small></div>
-        <div><span id="roughnessNow">---</span><small>índice agora</small></div>
+        <div><span id="roughnessNow">---</span><small>índice atual</small></div>
+        <div><span id="motionCount">0</span><small>amostras no intervalo</small></div>
       </div>
 
       <p id="status" class="muted">Pronto para iniciar.</p>
@@ -74,9 +78,11 @@
         <li>Clique em <b>Liberar sensores</b>.</li>
         <li>Com o carro parado, clique em <b>Calibrar parado 15s</b>.</li>
         <li>Clique em <b>Iniciar coleta</b> e dirija.</li>
-        <li>Ao terminar, clique em <b>Parar</b> e exporte CSV ou GeoJSON.</li>
+        <li>Use <b>Pausar</b> quando parar, sair do carro ou quiser ignorar um período.</li>
+        <li>Ao terminar, clique em <b>Parar e salvar</b>.</li>
+        <li>Exporte CSV, pontos GeoJSON ou trechos GeoJSON.</li>
       </ol>
-      <p class="muted">Dica: use sempre a mesma posição do celular e compare ruas conhecidas como boas/ruins para ajustar os limites depois.</p>
+      <p class="muted">Nesta versão, o acelerômetro é lido continuamente, mas o registro é salvo quando o GPS atualiza. Assim, cada ponto tem estatísticas do intervalo anterior.</p>
     </section>
   </main>
 
