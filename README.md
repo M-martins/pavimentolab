@@ -1,17 +1,20 @@
-# PavimentoLab PWA v2
+# PavimentoLab PWA v4
 
 POC para coletar vibração + GPS do celular e exportar:
 - CSV de pontos
 - GeoJSON de pontos
 - GeoJSON de trechos/linhas
 
-## Novidades da v2
+## Novidades da v4
 
 - Botão Pausar/Retomar.
-- O acelerômetro acumula leituras no intervalo.
+- Mapa ao vivo com OpenStreetMap/Leaflet.
+- Mostra posição atual durante a coleta.
+- Desenha trechos coloridos pela classificação.
+- Salva direção (`heading`) e velocidade quando o GPS informar.
 - O GPS fecha o registro espacial.
-- Cada ponto salvo tem estatísticas do intervalo anterior.
-- Os trechos são criados entre pontos GPS consecutivos válidos.
+- Os trechos são forçados entre pontos GPS consecutivos.
+- Em vez de descartar trechos problemáticos, o app marca `segment_quality` e `flags`.
 - Exportação separada de pontos e linhas.
 
 ## Como usar no Android
@@ -34,3 +37,7 @@ POC para coletar vibração + GPS do celular e exportar:
 - Use sempre a mesma posição do celular.
 - A calibração e as coletas ficam no armazenamento local do navegador.
 - Para testes longos, futuramente vale migrar de localStorage para IndexedDB.
+
+## Observação sobre o mapa
+
+O mapa ao vivo usa Leaflet via CDN e fundo OpenStreetMap. Ele precisa de internet para carregar o mapa base. A coleta, armazenamento local e exportação continuam funcionando mesmo se o mapa não carregar.

@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#111827" />
   <title>PavimentoLab</title>
   <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -67,6 +68,19 @@
     </section>
 
     <section class="card">
+      <h2>Mapa ao vivo</h2>
+      <div id="liveMap"></div>
+      <div class="legend">
+        <span><i class="lg-bom"></i> Boa</span>
+        <span><i class="lg-regular"></i> Regular</span>
+        <span><i class="lg-ruim"></i> Ruim</span>
+        <span><i class="lg-critico"></i> Crítica</span>
+        <span><i class="lg-sem"></i> Sem amostra</span>
+      </div>
+      <p class="muted">O mapa precisa de internet para carregar o fundo OpenStreetMap. A coleta e a exportação continuam funcionando mesmo se o mapa não carregar.</p>
+    </section>
+
+    <section class="card">
       <h2>3. Coletas salvas</h2>
       <div id="collectionsList" class="list"></div>
     </section>
@@ -86,6 +100,7 @@
     </section>
   </main>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

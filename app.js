@@ -7,6 +7,10 @@ const state = {
   gpsWatchId: null,
   motionBuffer: [],
   calibrationSamples: null,
+  map: null,
+  mapMarker: null,
+  mapLayer: null,
+  mapInitialized: false,
 };
 
 const els = {
@@ -79,6 +83,96 @@ function distanceMeters(a, b) {
   const x = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
   return 2 * R * Math.atan2(Math.sqrt(x), Math.sqrt(1-x));
 }
+
+
+function colorByClass(classe) {
+  if (classe === "bom") return "#22c55e";
+  if (classe === "regular") return "#f59e0b";
+  if (classe === "ruim") return "#f97316";
+  if (classe === "critico") return "#ef4444";
+  return "#94a3b8";
+}
+
+function initMapIfNeeded(lat = -23.5505, lon = -46.6333) {
+  if (state.mapInitialized) return;
+  if (typeof L === "undefined") {
+    console.warn("Leaflet não carregado. Mapa ao vivo indisponível.");
+    return;
+  }
+
+  state.map = L.map("liveMap", {
+    zoomControl: true,
+    attributionControl: true
+  }).setView([lat, lon], 17);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 20,
+    attribution: "&copy; OpenStreetMap"
+  }).addTo(state.map);
+
+  state.mapLayer = L.layerGroup().addTo(state.map);
+  state.mapInitialized = true;
+}
+
+function updateLiveMap(point, previous, segment = null) {
+  if (!point || typeof point.lat !== "number" || typeof point.lon !== "number") return;
+  initMapIfNeeded(point.lat, point.lon);
+  if (!state.mapInitialized) return;
+
+  const latlng = [point.lat, point.lon];
+
+  if (!state.mapMarker) {
+    state.mapMarker = L.circleMarker(latlng, {
+      radius: 7,
+      weight: 2,
+      color: "#ffffff",
+      fillColor: "#38bdf8",
+      fillOpacity: 1
+    }).addTo(state.mapLayer);
+  } else {
+    state.mapMarker.setLatLng(latlng);
+  }
+
+  const speedKmh = point.speed_mps == null ? null : point.speed_mps * 3.6;
+  const popup = [
+    `<b>Posição atual</b>`,
+    `Classe: ${point.classe}`,
+    `Índice: ${point.roughness_index == null ? "sem amostra" : point.roughness_index.toFixed(2)}`,
+    `Velocidade: ${speedKmh == null ? "---" : speedKmh.toFixed(1) + " km/h"}`,
+    `Direção: ${point.heading == null ? "---" : point.heading.toFixed(0) + "°"}`,
+    `GPS: ${point.gps_accuracy_m == null ? "---" : point.gps_accuracy_m.toFixed(1) + " m"}`
+  ].join("<br>");
+  state.mapMarker.bindPopup(popup);
+
+  if (previous && segment && typeof previous.lat === "number" && typeof previous.lon === "number") {
+    L.polyline(
+      [[previous.lat, previous.lon], [point.lat, point.lon]],
+      {
+        color: colorByClass(segment.classe),
+        weight: 7,
+        opacity: segment.segment_quality === "baixa_confianca" ? 0.45 : 0.90
+      }
+    ).bindPopup([
+      `<b>Trecho</b>`,
+      `Classe: ${segment.classe}`,
+      `Qualidade: ${segment.segment_quality}`,
+      `Índice: ${segment.roughness_index == null ? "sem amostra" : segment.roughness_index.toFixed(2)}`,
+      `Distância: ${segment.distance_m == null ? "---" : segment.distance_m.toFixed(1) + " m"}`,
+      `Velocidade: ${segment.speed_mps == null ? "---" : (segment.speed_mps * 3.6).toFixed(1) + " km/h"}`,
+      `Direção: ${point.heading == null ? "---" : point.heading.toFixed(0) + "°"}`,
+      `Flags: ${segment.flags || "-"}`
+    ].join("<br>")).addTo(state.mapLayer);
+  }
+
+  state.map.setView(latlng, state.map.getZoom(), { animate: false });
+}
+
+function clearLiveMapRoute() {
+  if (!state.mapInitialized || !state.mapLayer) return;
+  state.mapLayer.clearLayers();
+  state.mapMarker = null;
+}
+
 
 async function requestPermissions() {
   try {
@@ -168,7 +262,20 @@ function onGps(pos) {
   els.gpsAccuracy.textContent = c.accuracy ? `${c.accuracy.toFixed(1)} m` : "---";
 
   if (!state.collecting || state.paused || !state.current) return;
-  if (!state.motionBuffer.length) return;
+
+  // V3: salva ponto GPS sempre que possível.
+  // Se não houver amostras do acelerômetro no intervalo, ainda assim o ponto entra,
+  // e o trecho fica marcado com baixa/atenção em vez de sumir do mapa.
+  const summary = state.motionBuffer.length
+    ? summarizeBuffer()
+    : {
+        sample_count: 0,
+        roughness_mean: null,
+        roughness_max: null,
+        roughness_std: null,
+        peak_count: 0,
+        roughness_index: null,
+      };
 
   const point = {
     timestamp: new Date().toISOString(),
@@ -178,48 +285,80 @@ function onGps(pos) {
     speed_mps: c.speed ?? null,
     heading: c.heading ?? null,
     altitude: c.altitude ?? null,
-    ...summarizeBuffer(),
+    ...summary,
   };
-  point.classe = classByIndex(point.roughness_index);
+
+  point.classe = point.roughness_index === null ? "sem_amostra" : classByIndex(point.roughness_index);
 
   const previous = state.lastGpsPoint;
+  let createdSegment = null;
   state.current.points.push(point);
 
-  if (previous) {
+  // V3: força a criação de trecho entre pontos GPS consecutivos.
+  // Não descartamos mais por distância curta, salto ou precisão; apenas marcamos flags.
+  if (previous && typeof previous.lat === "number" && typeof previous.lon === "number") {
     const dist = distanceMeters(previous, point);
-    const validDistance = dist !== null && dist >= 1.5 && dist <= 80;
-    const validGps = (point.gps_accuracy_m ?? 999) <= 35 && (previous.gps_accuracy_m ?? 999) <= 35;
+    const accNow = point.gps_accuracy_m ?? 999;
+    const accPrev = previous.gps_accuracy_m ?? 999;
 
-    if (validDistance && validGps) {
-      const segment = {
-        timestamp_start: previous.timestamp,
-        timestamp_end: point.timestamp,
-        lat_start: previous.lat,
-        lon_start: previous.lon,
-        lat_end: point.lat,
-        lon_end: point.lon,
-        distance_m: dist,
-        speed_mps: point.speed_mps,
-        gps_accuracy_start_m: previous.gps_accuracy_m,
-        gps_accuracy_end_m: point.gps_accuracy_m,
-        sample_count: point.sample_count,
-        roughness_mean: point.roughness_mean,
-        roughness_max: point.roughness_max,
-        roughness_std: point.roughness_std,
-        peak_count: point.peak_count,
-        roughness_index: point.roughness_index,
-        classe: point.classe,
-      };
-      state.current.segments.push(segment);
+    let segment_quality = "ok";
+    const flags = [];
+
+    if (dist !== null && dist < 1.5) {
+      flags.push("trecho_muito_curto");
+      segment_quality = "atencao";
     }
+
+    if (dist !== null && dist > 120) {
+      flags.push("possivel_salto_gps");
+      segment_quality = "baixa_confianca";
+    }
+
+    if (accNow > 35 || accPrev > 35) {
+      flags.push("gps_baixa_precisao");
+      segment_quality = "baixa_confianca";
+    }
+
+    if (point.sample_count === 0) {
+      flags.push("sem_amostra_acelerometro");
+      if (segment_quality === "ok") segment_quality = "atencao";
+    }
+
+    const segment = {
+      timestamp_start: previous.timestamp,
+      timestamp_end: point.timestamp,
+      lat_start: previous.lat,
+      lon_start: previous.lon,
+      lat_end: point.lat,
+      lon_end: point.lon,
+      distance_m: dist,
+      speed_mps: point.speed_mps,
+      gps_accuracy_start_m: previous.gps_accuracy_m,
+      gps_accuracy_end_m: point.gps_accuracy_m,
+      sample_count: point.sample_count,
+      roughness_mean: point.roughness_mean,
+      roughness_max: point.roughness_max,
+      roughness_std: point.roughness_std,
+      peak_count: point.peak_count,
+      roughness_index: point.roughness_index,
+      classe: point.classe,
+      segment_quality,
+      flags: flags.join(";"),
+    };
+
+    state.current.segments.push(segment);
+    createdSegment = segment;
   }
+
+  updateLiveMap(point, previous, createdSegment);
 
   state.lastGpsPoint = point;
   state.motionBuffer = [];
 
   els.pointCount.textContent = state.current.points.length;
   els.segmentCount.textContent = state.current.segments.length;
-  els.roughnessNow.textContent = `${point.roughness_index.toFixed(2)} (${point.classe})`;
+  els.roughnessNow.textContent =
+    point.roughness_index === null ? "sem amostra" : `${point.roughness_index.toFixed(2)} (${point.classe})`;
   els.motionCount.textContent = "0";
 
   saveCurrentDraft();
@@ -274,6 +413,8 @@ function calibrate() {
 
 function startCollection() {
   const name = collectionName();
+
+  clearLiveMapRoute();
 
   state.current = {
     id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
@@ -474,6 +615,8 @@ function toSegmentsGeoJson(collection) {
       peak_count: s.peak_count,
       roughness_index: s.roughness_index,
       classe: s.classe,
+      segment_quality: s.segment_quality,
+      flags: s.flags,
       collection: collection.name,
       driver: collection.driver,
       vehicle: collection.vehicle,
@@ -591,6 +734,7 @@ els.btnPause.addEventListener("click", togglePause);
 els.btnStop.addEventListener("click", stopCollection);
 
 startGpsWatch();
+initMapIfNeeded();
 loadSavedState();
 renderCollections();
 registerServiceWorker();
