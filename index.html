@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <title>PavimentoLab</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">POC de campo</p>
+        <h1>PavimentoLab</h1>
+        <p class="subtitle">Coleta vibração + GPS do celular para mapear trechos bons, ruins e críticos.</p>
+      </div>
+      <div id="sensorBadge" class="badge warn">Aguardando</div>
+    </header>
+
+    <section class="card">
+      <h2>1. Preparar coleta</h2>
+      <label>
+        Motorista
+        <input id="driverName" placeholder="Ex.: Márcio" />
+      </label>
+      <label>
+        Veículo
+        <input id="vehicleName" placeholder="Ex.: meu carro" />
+      </label>
+      <label>
+        Posição do celular
+        <select id="mountPosition">
+          <option value="suporte_painel">Suporte no painel</option>
+          <option value="console_central">Console central</option>
+          <option value="assoalho">Assoalho</option>
+          <option value="outro">Outro</option>
+        </select>
+      </label>
+      <div class="actions">
+        <button id="btnPermission">Liberar sensores</button>
+        <button id="btnCalibrate" class="secondary">Calibrar parado 15s</button>
+      </div>
+      <p id="calibrationInfo" class="muted">Sem calibração ainda.</p>
+    </section>
+
+    <section class="card">
+      <h2>2. Coletar</h2>
+      <div class="actions">
+        <button id="btnStart" class="primary">Iniciar coleta</button>
+        <button id="btnStop" class="danger" disabled>Parar</button>
+      </div>
+
+      <div class="metrics">
+        <div><span id="currentName">---</span><small>coleta</small></div>
+        <div><span id="pointCount">0</span><small>registros</small></div>
+        <div><span id="gpsAccuracy">---</span><small>precisão GPS</small></div>
+        <div><span id="roughnessNow">---</span><small>índice agora</small></div>
+      </div>
+
+      <p id="status" class="muted">Pronto para iniciar.</p>
+    </section>
+
+    <section class="card">
+      <h2>3. Coletas salvas</h2>
+      <div id="collectionsList" class="list"></div>
+    </section>
+
+    <section class="card">
+      <h2>Como usar</h2>
+      <ol>
+        <li>Prenda o celular bem firme no carro.</li>
+        <li>Clique em <b>Liberar sensores</b>.</li>
+        <li>Com o carro parado, clique em <b>Calibrar parado 15s</b>.</li>
+        <li>Clique em <b>Iniciar coleta</b> e dirija.</li>
+        <li>Ao terminar, clique em <b>Parar</b> e exporte CSV ou GeoJSON.</li>
+      </ol>
+      <p class="muted">Dica: use sempre a mesma posição do celular e compare ruas conhecidas como boas/ruins para ajustar os limites depois.</p>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
