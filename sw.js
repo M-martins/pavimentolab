@@ -1,4 +1,4 @@
-const CACHE_NAME = "pavimentolab-v6-10m";
+const CACHE_NAME = "pavimentolab-v7-diagnostico";
 const ASSETS = [
   "./",
   "./index.html",

@@ -614,3 +614,38 @@ button {
     box-shadow:0 32px 90px rgba(0,0,0,.42);
   }
 }
+
+
+.diagnostic-list {
+  display:grid;
+  gap:8px;
+  margin-top:12px;
+}
+
+.diagnostic-list div {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  background:#07111f;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  padding:9px 10px;
+}
+
+.diagnostic-list span {
+  color:var(--muted);
+  font-size:.82rem;
+}
+
+.diagnostic-list strong {
+  font-size:.9rem;
+  text-align:right;
+}
+
+.diagnostic-note {
+  margin:12px 0 0;
+  color:var(--muted);
+  line-height:1.45;
+  font-size:.82rem;
+}

@@ -94,13 +94,27 @@
         </div>
 
         <section class="health-card">
-          <h3>Qualidade dos sensores</h3>
+          <h3>Diagnóstico da coleta</h3>
           <div class="health-grid">
             <div><span id="healthGps" class="health-dot warn"></span><b>GPS</b><small id="healthGpsText">aguardando</small></div>
             <div><span id="healthMotion" class="health-dot warn"></span><b>Sensores</b><small id="healthMotionText">aguardando</small></div>
             <div><span id="healthWake" class="health-dot warn"></span><b>Tela</b><small id="healthWakeText">não ativa</small></div>
-            <div><span id="healthStorage" class="health-dot ok"></span><b>Dados</b><small>local</small></div>
+            <div><span id="healthStorage" class="health-dot ok"></span><b>Dados</b><small id="healthStorageText">local</small></div>
           </div>
+
+          <div class="diagnostic-list">
+            <div><span>Último GPS</span><strong id="diagGpsAge">--</strong></div>
+            <div><span>Intervalo médio GPS</span><strong id="diagGpsInterval">--</strong></div>
+            <div><span>Precisão GPS</span><strong id="diagGpsAccuracy">--</strong></div>
+            <div><span>Taxa acelerômetro</span><strong id="diagMotionHz">--</strong></div>
+            <div><span>Status da janela</span><strong id="diagVisibility">ativa</strong></div>
+            <div><span>Salvamento local</span><strong id="diagLastSave">--</strong></div>
+          </div>
+
+          <p class="diagnostic-note">
+            Se a tela apagar ou o app ficar em segundo plano, o Android pode reduzir GPS e sensores.
+            Para teste, mantenha o app aberto e o Chrome sem restrições de bateria.
+          </p>
         </section>
 
         <section class="history-card">

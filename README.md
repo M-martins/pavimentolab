@@ -1,4 +1,4 @@
-# PavimentoLab PWA v6 - Map First 10m
+# PavimentoLab PWA v7 - Diagnóstico
 
 Nova versão com interface centrada no mapa.
 
@@ -40,3 +40,18 @@ A versão usa Wake Lock API para tentar manter a tela ligada, mas no Android iss
 1. Configurações do Android > Apps > Chrome > Bateria > Sem restrições.
 2. Não bloquear a tela durante a coleta.
 3. Manter o app aberto em primeiro plano.
+
+
+## Mudanças da v7
+
+Foco em estabilidade da coleta:
+
+- Diagnóstico detalhado no menu lateral.
+- Último GPS recebido.
+- Intervalo médio entre pontos GPS.
+- Precisão atual do GPS.
+- Taxa aproximada do acelerômetro em Hz.
+- Detecção se a janela foi para segundo plano.
+- Registro de eventos de visibilidade na coleta.
+- Persistência incremental reforçada a cada atualização.
+- Recuperação de coleta não finalizada se o navegador/app for fechado.
