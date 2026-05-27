@@ -1,4 +1,4 @@
-# PavimentoLab PWA v7 - Diagnóstico
+# PavimentoLab PWA v8 - Anti-drift e simplificado
 
 Nova versão com interface centrada no mapa.
 
@@ -55,3 +55,13 @@ Foco em estabilidade da coleta:
 - Registro de eventos de visibilidade na coleta.
 - Persistência incremental reforçada a cada atualização.
 - Recuperação de coleta não finalizada se o navegador/app for fechado.
+
+
+## Mudanças da v8
+
+- Filtro anti-drift: passos GPS menores que 2 m não acumulam distância para trechos.
+- Pontos brutos continuam sendo salvos para diagnóstico.
+- Trechos continuam agregados a cada 10 m válidos.
+- Exportação de pontos brutos.
+- Nova exportação de pontos simplificados, contendo apenas início e fim de cada trecho.
+- CSV bruto agora indica se o ponto foi usado no trecho e o motivo caso tenha sido ignorado.
