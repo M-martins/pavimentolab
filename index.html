@@ -4,60 +4,46 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#06111f" />
-  <title>PavimentoLab</title>
-  <link rel="manifest" href="./manifest.webmanifest?v=11" />
+  <title>PavimentoLab v12</title>
+  <link rel="manifest" href="./manifest.webmanifest?v=12" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="./styles-v11.css?v=11" />
+  <link rel="stylesheet" href="./styles-v12.css?v=12" />
 </head>
 <body>
-  <main class="app-shell">
+  <main class="app">
     <header class="topbar">
-      <button id="btnMenu" class="icon-btn" aria-label="Abrir menu">☰</button>
-      <div class="brand">PavimentoLab</div>
-      <div id="recordingPill" class="recording-pill idle"><span></span><b>Pronto</b></div>
+      <button id="btnMenu" class="icon-btn">☰</button>
+      <div>
+        <div class="brand">PavimentoLab</div>
+        <div class="version">v12 clean</div>
+      </div>
+      <div id="statusPill" class="status-pill idle"><span></span><b>Pronto</b></div>
     </header>
 
     <section class="map-wrap">
       <div id="map"></div>
-
       <div id="gpsPill" class="gps-pill">GPS --</div>
+      <button id="btnLocate" class="locate-btn">⦿</button>
 
-      <button id="btnLocate" class="locate-btn" aria-label="Minha localização">
-        ⦿
-      </button>
-
-      <div class="stats-card">
-        <div>
-          <strong id="distanceValue">0,0 km</strong>
-          <small>distância</small>
-        </div>
-        <div>
-          <strong id="durationValue">00:00:00</strong>
-          <small>tempo</small>
-        </div>
-        <div>
-          <strong id="speedValue">-- km/h</strong>
-          <small>velocidade média</small>
-        </div>
+      <div class="stats">
+        <div><strong id="distanceValue">0,0 km</strong><small>distância</small></div>
+        <div><strong id="durationValue">00:00:00</strong><small>tempo</small></div>
+        <div><strong id="speedValue">-- km/h</strong><small>vel. média</small></div>
       </div>
     </section>
 
-    <section class="quality-card">
+    <section class="quality">
       <div class="quality-head">
-        <div>
-          <h1>Qualidade da coleta</h1>
-        </div>
+        <h2>Qualidade da coleta</h2>
         <span>Distribuição dos trechos</span>
       </div>
-
-      <div class="stacked-bar" aria-label="Distribuição da qualidade dos trechos">
-        <i id="barGood" class="bar-good" style="width:0%"></i>
-        <i id="barRegular" class="bar-regular" style="width:0%"></i>
-        <i id="barBad" class="bar-bad" style="width:0%"></i>
-        <i id="barCritical" class="bar-critical" style="width:0%"></i>
-        <i id="barNoSample" class="bar-nosample" style="width:100%"></i>
+      <div class="bar">
+        <i id="barGood" class="good" style="width:0%"></i>
+        <i id="barRegular" class="regular" style="width:0%"></i>
+        <i id="barBad" class="bad" style="width:0%"></i>
+        <i id="barCritical" class="critical" style="width:0%"></i>
+        <i id="barEmpty" class="empty" style="width:100%"></i>
       </div>
-
       <div class="quality-grid">
         <div><i class="dot good"></i><strong id="pctGood">0%</strong><small>Boa</small></div>
         <div><i class="dot regular"></i><strong id="pctRegular">0%</strong><small>Regular</small></div>
@@ -66,62 +52,42 @@
       </div>
     </section>
 
-    <section class="action-panel">
+    <section class="actions">
       <button id="btnMain" class="main-action start">
-        <span class="action-icon">●</span>
-        <span>
-          <b>Iniciar gravação</b>
-          <small>calibrar e começar</small>
-        </span>
+        <span class="circle">●</span>
+        <span><b>Iniciar gravação</b><small>calibrar e começar</small></span>
         <i id="holdProgress"></i>
       </button>
-
       <button id="btnPause" class="pause-action" disabled>
-        <span>Ⅱ</span>
-        <b>Pausar</b>
-        <small>pausar coleta</small>
+        <span>Ⅱ</span><b>Pausar</b><small>pausar coleta</small>
       </button>
     </section>
 
-    <aside id="drawer" class="drawer" aria-hidden="true">
+    <aside id="drawer" class="drawer">
       <div class="drawer-panel">
         <div class="drawer-head">
-          <div>
-            <h2>PavimentoLab</h2>
-            <p>Histórico e saúde da coleta</p>
-          </div>
+          <div><h1>PavimentoLab</h1><p>v12 clean · diagnóstico e histórico</p></div>
           <button id="btnCloseDrawer" class="icon-btn">×</button>
         </div>
 
-        <section class="health-card">
-          <h3>Diagnóstico da coleta</h3>
-          <div class="health-grid">
-            <div><span id="healthGps" class="health-dot warn"></span><b>GPS</b><small id="healthGpsText">aguardando</small></div>
-            <div><span id="healthMotion" class="health-dot warn"></span><b>Sensores</b><small id="healthMotionText">aguardando</small></div>
-            <div><span id="healthWake" class="health-dot warn"></span><b>Tela</b><small id="healthWakeText">não ativa</small></div>
-            <div><span id="healthStorage" class="health-dot ok"></span><b>Dados</b><small id="healthStorageText">local</small></div>
+        <section class="card">
+          <h2>Diagnóstico</h2>
+          <div class="diag-grid">
+            <div><b>GPS</b><small id="diagGps">--</small></div>
+            <div><b>Sensores</b><small id="diagMotion">--</small></div>
+            <div><b>Tela</b><small id="diagWake">--</small></div>
+            <div><b>Dados</b><small id="diagSave">--</small></div>
           </div>
-
-          <div class="diagnostic-list">
-            <div><span>Último GPS</span><strong id="diagGpsAge">--</strong></div>
-            <div><span>Intervalo médio GPS</span><strong id="diagGpsInterval">--</strong></div>
-            <div><span>Precisão GPS</span><strong id="diagGpsAccuracy">--</strong></div>
-            <div><span>Taxa acelerômetro</span><strong id="diagMotionHz">--</strong></div>
-            <div><span>Status da janela</span><strong id="diagVisibility">ativa</strong></div>
-            <div><span>Salvamento local</span><strong id="diagLastSave">--</strong></div>
+          <div class="diag-list">
+            <p><span>Último GPS</span><b id="diagGpsAge">--</b></p>
+            <p><span>Intervalo médio GPS</span><b id="diagGpsInterval">--</b></p>
+            <p><span>Taxa acelerômetro</span><b id="diagMotionHz">--</b></p>
+            <p><span>Status janela</span><b id="diagVisibility">ativa</b></p>
           </div>
-
-          <p class="diagnostic-note">
-            Se a tela apagar ou o app ficar em segundo plano, o Android pode reduzir GPS e sensores.
-            Para teste, mantenha o app aberto e o Chrome sem restrições de bateria.
-          </p>
         </section>
 
-        <section class="history-card">
-          <div class="history-title">
-            <h3>Histórico de rotas</h3>
-            <button id="btnClearAll" class="text-danger">limpar tudo</button>
-          </div>
+        <section class="card">
+          <div class="history-title"><h2>Histórico</h2><button id="btnClearAll">limpar tudo</button></div>
           <div id="historyList" class="history-list"></div>
         </section>
       </div>
@@ -129,12 +95,12 @@
 
     <div id="modal" class="modal hidden">
       <div class="modal-card">
-        <h2 id="modalTitle">Preparando coleta</h2>
+        <h2 id="modalTitle">Preparando</h2>
         <p id="modalText">Aguarde...</p>
-        <div id="modalSpinner" class="spinner"></div>
+        <div id="spinner" class="spinner"></div>
         <div id="modalActions" class="modal-actions hidden">
           <button id="btnExportCsv">CSV bruto</button>
-          <button id="btnExportPoints">Pontos brutos</button>
+          <button id="btnExportRawPoints">Pontos brutos</button>
           <button id="btnExportSimplePoints">Pontos simplificados</button>
           <button id="btnExportSegments">Trechos</button>
           <button id="btnCloseModal" class="secondary">Fechar</button>
@@ -144,6 +110,6 @@
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="./app-v11.js?v=11"></script>
+  <script src="./app-v12.js?v=12"></script>
 </body>
 </html>

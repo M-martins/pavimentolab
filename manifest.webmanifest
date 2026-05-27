@@ -1,8 +1,7 @@
 {
   "name": "PavimentoLab",
   "short_name": "PavimentoLab",
-  "description": "Coleta vibração e GPS para classificar qualidade de pavimento.",
-  "start_url": "./index.html",
+  "start_url": "./index.html?v=12",
   "display": "standalone",
   "background_color": "#06111f",
   "theme_color": "#06111f",
@@ -10,8 +9,7 @@
     {
       "src": "./icon.svg",
       "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "type": "image/svg+xml"
     }
   ]
 }

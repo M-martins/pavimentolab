@@ -1,99 +1,19 @@
-# PavimentoLab PWA v11 - Correção Auto-follow + Anti-drift
+# PavimentoLab v12 clean
 
-Nova versão com interface centrada no mapa.
+Base limpa, sem herança das versões anteriores.
 
-## Inclui
+## Controle
+A versão aparece:
+- no topo da interface
+- no menu lateral
+- no console
+- nos metadados dos arquivos exportados
+- no histórico
 
-- Mapa central com base Carto/OSM mais limpa
-- Posição atual do veículo
-- Botão de minha localização
-- Trechos coloridos por classe
-- Indicador de qualidade da coleta em porcentagem
-- Distância da corrida
-- Tempo de gravação
-- Velocidade média
-- Botão de pausa
-- Botão de parar com "segure para parar"
-- Menu lateral com qualidade dos sensores e histórico
-- Exportação CSV de pontos
-- Exportação GeoJSON de pontos
-- Exportação GeoJSON de trechos
-- Wake Lock API para tentar manter a tela ligada
-- GPS como limitante espacial da coleta
-- Pontos GPS salvos continuamente, mas trechos agregados a cada 10 metros
-
-## Observações
-
-- O mapa precisa de internet para carregar a base.
-- A coleta e exportação são locais.
-- Para o Android não dormir, também configure o Chrome como "sem restrições" na bateria.
-
-
-## Mudança da v6
-
-A coleta continua salvando os pontos GPS, mas a camada de trechos agora só é fechada quando o deslocamento acumulado atinge aproximadamente 10 metros. Isso reduz trechos muito curtos e deixa o mapa mais limpo.
-
-## Tela ligada
-
-A versão usa Wake Lock API para tentar manter a tela ligada, mas no Android isso pode falhar dependendo das permissões do Chrome e da economia de bateria. Para melhorar:
-
-1. Configurações do Android > Apps > Chrome > Bateria > Sem restrições.
-2. Não bloquear a tela durante a coleta.
-3. Manter o app aberto em primeiro plano.
-
-
-## Mudanças da v7
-
-Foco em estabilidade da coleta:
-
-- Diagnóstico detalhado no menu lateral.
-- Último GPS recebido.
-- Intervalo médio entre pontos GPS.
-- Precisão atual do GPS.
-- Taxa aproximada do acelerômetro em Hz.
-- Detecção se a janela foi para segundo plano.
-- Registro de eventos de visibilidade na coleta.
-- Persistência incremental reforçada a cada atualização.
-- Recuperação de coleta não finalizada se o navegador/app for fechado.
-
-
-## Mudanças da v8
-
-- Filtro anti-drift: passos GPS menores que 2 m não acumulam distância para trechos.
-- Pontos brutos continuam sendo salvos para diagnóstico.
-- Trechos continuam agregados a cada 10 m válidos.
-- Exportação de pontos brutos.
-- Nova exportação de pontos simplificados, contendo apenas início e fim de cada trecho.
-- CSV bruto agora indica se o ponto foi usado no trecho e o motivo caso tenha sido ignorado.
-
-
-## Mudanças da v9
-
-- Arquivos renomeados para `app-v9.js` e `styles-v9.css`.
-- Referências com `?v=9`.
-- Service Worker antigo é desregistrado automaticamente.
-- Mantém anti-drift de 2 m.
-- Mantém agregação dos trechos a cada 10 m válidos.
-- Mantém exportação de pontos brutos, pontos simplificados e trechos.
-
-Essa versão foi criada para resolver mistura de cache entre versões antigas do PWA.
-
-
-## Mudanças da v10
-
-- Ao abrir, o app tenta obter a localização inicial e centralizar o mapa.
-- Durante a gravação, o mapa segue automaticamente a posição do veículo.
-- Se o usuário arrastar ou der zoom no mapa, o modo seguir é pausado.
-- O botão de localização reativa o modo seguir.
-- O status do GPS mostra `seguindo` ou `livre`.
-
-
-## Mudanças da v11
-
-- Auto-follow simplificado: durante a gravação, cada ponto GPS recentraliza o mapa.
-- Removida a lógica que desligava o acompanhamento ao mexer no mapa durante gravação.
-- Anti-drift aplicado de verdade: passos menores que 2 m não acumulam trecho.
-- Trechos fechados somente a cada 10 m válidos.
-- Pontos brutos continuam salvos para diagnóstico.
-- Exportação de pontos simplificados: início e fim de cada trecho.
-- Arquivos versionados como app-v11.js e styles-v11.css para evitar cache.
+## Lógica
+- Pontos brutos sempre salvos.
+- Anti-drift: deslocamentos GPS menores que 2 m não acumulam trecho.
+- Trechos fechados a cada 10 m válidos.
+- Pontos simplificados = início e fim de cada trecho.
+- Auto-follow simples durante gravação.
+- Service Worker desativado/desregistrado.
