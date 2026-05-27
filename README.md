@@ -1,4 +1,4 @@
-# PavimentoLab PWA v9 - Cache Safe
+# PavimentoLab PWA v10 - Auto Follow
 
 Nova versão com interface centrada no mapa.
 
@@ -77,3 +77,12 @@ Foco em estabilidade da coleta:
 - Mantém exportação de pontos brutos, pontos simplificados e trechos.
 
 Essa versão foi criada para resolver mistura de cache entre versões antigas do PWA.
+
+
+## Mudanças da v10
+
+- Ao abrir, o app tenta obter a localização inicial e centralizar o mapa.
+- Durante a gravação, o mapa segue automaticamente a posição do veículo.
+- Se o usuário arrastar ou der zoom no mapa, o modo seguir é pausado.
+- O botão de localização reativa o modo seguir.
+- O status do GPS mostra `seguindo` ou `livre`.
