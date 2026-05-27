@@ -3,101 +3,129 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#111827" />
+  <meta name="theme-color" content="#06111f" />
   <title>PavimentoLab</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <main class="app">
-    <header class="hero">
-      <div>
-        <p class="eyebrow">POC de campo</p>
-        <h1>PavimentoLab</h1>
-        <p class="subtitle">Coleta vibração + GPS do celular para gerar pontos e trechos classificados.</p>
-      </div>
-      <div id="sensorBadge" class="badge warn">Aguardando</div>
+  <main class="app-shell">
+    <header class="topbar">
+      <button id="btnMenu" class="icon-btn" aria-label="Abrir menu">☰</button>
+      <div class="brand">PavimentoLab</div>
+      <div id="recordingPill" class="recording-pill idle"><span></span><b>Pronto</b></div>
     </header>
 
-    <section class="card">
-      <h2>1. Preparar coleta</h2>
-      <label>
-        Motorista
-        <input id="driverName" placeholder="Ex.: Márcio" />
-      </label>
-      <label>
-        Veículo
-        <input id="vehicleName" placeholder="Ex.: meu carro" />
-      </label>
-      <label>
-        Posição do celular
-        <select id="mountPosition">
-          <option value="suporte_painel">Suporte no painel</option>
-          <option value="console_central">Console central</option>
-          <option value="assoalho">Assoalho</option>
-          <option value="outro">Outro</option>
-        </select>
-      </label>
+    <section class="map-wrap">
+      <div id="map"></div>
 
-      <div class="actions">
-        <button id="btnPermission">Liberar sensores</button>
-        <button id="btnCalibrate" class="secondary">Calibrar parado 15s</button>
+      <div id="gpsPill" class="gps-pill">GPS --</div>
+
+      <button id="btnLocate" class="locate-btn" aria-label="Minha localização">
+        ⦿
+      </button>
+
+      <div class="stats-card">
+        <div>
+          <strong id="distanceValue">0,0 km</strong>
+          <small>distância</small>
+        </div>
+        <div>
+          <strong id="durationValue">00:00:00</strong>
+          <small>tempo</small>
+        </div>
+        <div>
+          <strong id="speedValue">-- km/h</strong>
+          <small>velocidade média</small>
+        </div>
       </div>
-      <p id="calibrationInfo" class="muted">Sem calibração ainda.</p>
     </section>
 
-    <section class="card">
-      <h2>2. Coletar</h2>
-      <div class="actions">
-        <button id="btnStart" class="primary">Iniciar coleta</button>
-        <button id="btnPause" class="secondary" disabled>Pausar</button>
-        <button id="btnStop" class="danger" disabled>Parar e salvar</button>
+    <section class="quality-card">
+      <div class="quality-head">
+        <div>
+          <h1>Qualidade da coleta</h1>
+        </div>
+        <span>Distribuição dos trechos</span>
       </div>
 
-      <div class="metrics">
-        <div><span id="currentName">---</span><small>coleta</small></div>
-        <div><span id="pointCount">0</span><small>pontos GPS</small></div>
-        <div><span id="segmentCount">0</span><small>trechos</small></div>
-        <div><span id="gpsAccuracy">---</span><small>precisão GPS</small></div>
-        <div><span id="roughnessNow">---</span><small>índice atual</small></div>
-        <div><span id="motionCount">0</span><small>amostras no intervalo</small></div>
+      <div class="stacked-bar" aria-label="Distribuição da qualidade dos trechos">
+        <i id="barGood" class="bar-good" style="width:0%"></i>
+        <i id="barRegular" class="bar-regular" style="width:0%"></i>
+        <i id="barBad" class="bar-bad" style="width:0%"></i>
+        <i id="barCritical" class="bar-critical" style="width:0%"></i>
+        <i id="barNoSample" class="bar-nosample" style="width:100%"></i>
       </div>
 
-      <p id="status" class="muted">Pronto para iniciar.</p>
-    </section>
-
-    <section class="card">
-      <h2>Mapa ao vivo</h2>
-      <div id="liveMap"></div>
-      <div class="legend">
-        <span><i class="lg-bom"></i> Boa</span>
-        <span><i class="lg-regular"></i> Regular</span>
-        <span><i class="lg-ruim"></i> Ruim</span>
-        <span><i class="lg-critico"></i> Crítica</span>
-        <span><i class="lg-sem"></i> Sem amostra</span>
+      <div class="quality-grid">
+        <div><i class="dot good"></i><strong id="pctGood">0%</strong><small>Boa</small></div>
+        <div><i class="dot regular"></i><strong id="pctRegular">0%</strong><small>Regular</small></div>
+        <div><i class="dot bad"></i><strong id="pctBad">0%</strong><small>Ruim</small></div>
+        <div><i class="dot critical"></i><strong id="pctCritical">0%</strong><small>Crítica</small></div>
       </div>
-      <p class="muted">O mapa precisa de internet para carregar o fundo OpenStreetMap. A coleta e a exportação continuam funcionando mesmo se o mapa não carregar.</p>
     </section>
 
-    <section class="card">
-      <h2>3. Coletas salvas</h2>
-      <div id="collectionsList" class="list"></div>
+    <section class="action-panel">
+      <button id="btnMain" class="main-action start">
+        <span class="action-icon">●</span>
+        <span>
+          <b>Iniciar gravação</b>
+          <small>calibrar e começar</small>
+        </span>
+        <i id="holdProgress"></i>
+      </button>
+
+      <button id="btnPause" class="pause-action" disabled>
+        <span>Ⅱ</span>
+        <b>Pausar</b>
+        <small>pausar coleta</small>
+      </button>
     </section>
 
-    <section class="card">
-      <h2>Como usar</h2>
-      <ol>
-        <li>Prenda o celular bem firme no carro.</li>
-        <li>Clique em <b>Liberar sensores</b>.</li>
-        <li>Com o carro parado, clique em <b>Calibrar parado 15s</b>.</li>
-        <li>Clique em <b>Iniciar coleta</b> e dirija.</li>
-        <li>Use <b>Pausar</b> quando parar, sair do carro ou quiser ignorar um período.</li>
-        <li>Ao terminar, clique em <b>Parar e salvar</b>.</li>
-        <li>Exporte CSV, pontos GeoJSON ou trechos GeoJSON.</li>
-      </ol>
-      <p class="muted">Nesta versão, o acelerômetro é lido continuamente, mas o registro é salvo quando o GPS atualiza. Assim, cada ponto tem estatísticas do intervalo anterior.</p>
-    </section>
+    <aside id="drawer" class="drawer" aria-hidden="true">
+      <div class="drawer-panel">
+        <div class="drawer-head">
+          <div>
+            <h2>PavimentoLab</h2>
+            <p>Histórico e saúde da coleta</p>
+          </div>
+          <button id="btnCloseDrawer" class="icon-btn">×</button>
+        </div>
+
+        <section class="health-card">
+          <h3>Qualidade dos sensores</h3>
+          <div class="health-grid">
+            <div><span id="healthGps" class="health-dot warn"></span><b>GPS</b><small id="healthGpsText">aguardando</small></div>
+            <div><span id="healthMotion" class="health-dot warn"></span><b>Sensores</b><small id="healthMotionText">aguardando</small></div>
+            <div><span id="healthWake" class="health-dot warn"></span><b>Tela</b><small id="healthWakeText">não ativa</small></div>
+            <div><span id="healthStorage" class="health-dot ok"></span><b>Dados</b><small>local</small></div>
+          </div>
+        </section>
+
+        <section class="history-card">
+          <div class="history-title">
+            <h3>Histórico de rotas</h3>
+            <button id="btnClearAll" class="text-danger">limpar tudo</button>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </section>
+      </div>
+    </aside>
+
+    <div id="modal" class="modal hidden">
+      <div class="modal-card">
+        <h2 id="modalTitle">Preparando coleta</h2>
+        <p id="modalText">Aguarde...</p>
+        <div id="modalSpinner" class="spinner"></div>
+        <div id="modalActions" class="modal-actions hidden">
+          <button id="btnExportCsv">CSV pontos</button>
+          <button id="btnExportPoints">GeoJSON pontos</button>
+          <button id="btnExportSegments">GeoJSON trechos</button>
+          <button id="btnCloseModal" class="secondary">Fechar</button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
