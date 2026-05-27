@@ -1,4 +1,4 @@
-# PavimentoLab PWA v8 - Anti-drift e simplificado
+# PavimentoLab PWA v9 - Cache Safe
 
 Nova versão com interface centrada no mapa.
 
@@ -65,3 +65,15 @@ Foco em estabilidade da coleta:
 - Exportação de pontos brutos.
 - Nova exportação de pontos simplificados, contendo apenas início e fim de cada trecho.
 - CSV bruto agora indica se o ponto foi usado no trecho e o motivo caso tenha sido ignorado.
+
+
+## Mudanças da v9
+
+- Arquivos renomeados para `app-v9.js` e `styles-v9.css`.
+- Referências com `?v=9`.
+- Service Worker antigo é desregistrado automaticamente.
+- Mantém anti-drift de 2 m.
+- Mantém agregação dos trechos a cada 10 m válidos.
+- Mantém exportação de pontos brutos, pontos simplificados e trechos.
+
+Essa versão foi criada para resolver mistura de cache entre versões antigas do PWA.
