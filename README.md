@@ -1,4 +1,4 @@
-# PavimentoLab PWA v10 - Auto Follow
+# PavimentoLab PWA v11 - Correção Auto-follow + Anti-drift
 
 Nova versão com interface centrada no mapa.
 
@@ -86,3 +86,14 @@ Essa versão foi criada para resolver mistura de cache entre versões antigas do
 - Se o usuário arrastar ou der zoom no mapa, o modo seguir é pausado.
 - O botão de localização reativa o modo seguir.
 - O status do GPS mostra `seguindo` ou `livre`.
+
+
+## Mudanças da v11
+
+- Auto-follow simplificado: durante a gravação, cada ponto GPS recentraliza o mapa.
+- Removida a lógica que desligava o acompanhamento ao mexer no mapa durante gravação.
+- Anti-drift aplicado de verdade: passos menores que 2 m não acumulam trecho.
+- Trechos fechados somente a cada 10 m válidos.
+- Pontos brutos continuam salvos para diagnóstico.
+- Exportação de pontos simplificados: início e fim de cada trecho.
+- Arquivos versionados como app-v11.js e styles-v11.css para evitar cache.
