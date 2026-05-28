@@ -1,4 +1,4 @@
-# PavimentoLab v14 metadata + zip
+# PavimentoLab v15 robust stop
 
 Base limpa, sem herança das versões anteriores.
 
@@ -57,3 +57,26 @@ A versão aparece:
   - pontos_simplificados.geojson
   - trechos.geojson
 - Metadados de dispositivo e resumo nos GeoJSON.
+
+
+## Mudanças da v15
+
+Foco exclusivo em robustez do encerramento:
+
+- Ao parar, a coleta é salva no histórico antes de qualquer resumo, ZIP ou exportação.
+- A interface é resetada logo após salvar.
+- O resumo passa a ser calculado depois, de forma protegida.
+- Se o resumo falhar, a coleta continua salva.
+- Se o modal/exportação falhar, a coleta continua salva.
+- Adicionado fallback de preservação em caso de erro crítico.
+- A versão da interface passa a mostrar `v15 robust stop`.
+
+## Onde os dados ficam no celular
+
+Os dados ficam no armazenamento local do navegador, em `localStorage`, no domínio do GitHub Pages.
+
+Chaves principais:
+- `pavimentolab_collections_v15`: histórico de coletas finalizadas.
+- `pavimentolab_current_v15`: rascunho da coleta em andamento.
+
+No Android/Chrome isso fica dentro dos dados do app Chrome/PWA. Limpar dados do site, limpar armazenamento do Chrome ou remover dados do app pode apagar as coletas locais.

@@ -1,2 +1,2 @@
-// v14: service worker disabled
+// v15: service worker disabled
 self.addEventListener('activate', e => self.registration.unregister());
