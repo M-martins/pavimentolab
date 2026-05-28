@@ -4,10 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#06111f" />
-  <title>PavimentoLab v12</title>
-  <link rel="manifest" href="./manifest.webmanifest?v=12" />
+  <title>PavimentoLab v14</title>
+  <link rel="manifest" href="./manifest.webmanifest?v=14" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="./styles-v12.css?v=12" />
+  <link rel="stylesheet" href="./styles-v14.css?v=14" />
 </head>
 <body>
   <main class="app">
@@ -15,7 +15,7 @@
       <button id="btnMenu" class="icon-btn">☰</button>
       <div>
         <div class="brand">PavimentoLab</div>
-        <div class="version">v12 clean</div>
+        <div class="version">v14 metadata + zip</div>
       </div>
       <div id="statusPill" class="status-pill idle"><span></span><b>Pronto</b></div>
     </header>
@@ -66,7 +66,7 @@
     <aside id="drawer" class="drawer">
       <div class="drawer-panel">
         <div class="drawer-head">
-          <div><h1>PavimentoLab</h1><p>v12 clean · diagnóstico e histórico</p></div>
+          <div><h1>PavimentoLab</h1><p>v14 metadata + zip · diagnóstico e histórico</p></div>
           <button id="btnCloseDrawer" class="icon-btn">×</button>
         </div>
 
@@ -99,10 +99,12 @@
         <p id="modalText">Aguarde...</p>
         <div id="spinner" class="spinner"></div>
         <div id="modalActions" class="modal-actions hidden">
+          <button id="btnExportPackage">Pacote ZIP</button>
           <button id="btnExportCsv">CSV bruto</button>
           <button id="btnExportRawPoints">Pontos brutos</button>
           <button id="btnExportSimplePoints">Pontos simplificados</button>
           <button id="btnExportSegments">Trechos</button>
+          <button id="btnExportSummary">Resumo JSON</button>
           <button id="btnCloseModal" class="secondary">Fechar</button>
         </div>
       </div>
@@ -110,6 +112,7 @@
   </main>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="./app-v12.js?v=12"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="./app-v14.js?v=14"></script>
 </body>
 </html>
