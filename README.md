@@ -1,27 +1,30 @@
-# PavimentoLab v21 IndexedDB
+# PavimentoLab v21.1 IndexedDB
 
-Versão com IndexedDB, mas retomando a lógica antiga de classificação.
+Versão cirúrgica baseada na última v20.x funcional.
 
-## Mantido
+## O que mudou
 
-- IndexedDB como armazenamento principal.
-- Calibração obrigatória de 10 segundos.
-- Mapa limpo.
-- Histórico no banco local.
-- Exportação sob demanda.
+Somente a classificação voltou para a lógica antiga:
 
-## Corrigido
+- bom: `< 0.45`
+- regular: `< 1.10`
+- ruim: `< 2.00`
+- crítico: `>= 2.00`
 
-- Volta para os limiares antigos:
-  - bom: `< 0.45`
-  - regular: `< 1.10`
-  - ruim: `< 2.00`
-  - crítico: `>= 2.00`
-- Volta para o índice antigo:
-  - `roughness_index = mean + (std * 0.5) + min(1, peakCount / 10)`
-- Sem reclassificação posterior.
-- Classes continuam fixas: bom, regular, ruim e crítico.
+Fórmula:
 
-## URL
+`roughness_index = mean + (std * 0.5) + min(1, peakCount / 10)`
 
-`https://m-martins.github.io/pavimentolab/?v=21`
+## O que NÃO foi mexido
+
+- mapa;
+- GPS;
+- auto-follow;
+- IndexedDB;
+- calibração;
+- histórico;
+- exportação.
+
+URL:
+
+`https://m-martins.github.io/pavimentolab/?v=21-1`
