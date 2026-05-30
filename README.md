@@ -1,21 +1,14 @@
-# PavimentoLab v21.2 IndexedDB
+# PavimentoLab v21.4 IndexedDB
 
-Correção obrigatória do fluxo de gravação.
+Correção visual da calibração.
 
-## O que foi travado
+## Mudança
 
-- Clicar em iniciar SEMPRE abre calibração.
-- Calibração obrigatória de 10 segundos.
-- A gravação só começa depois da calibração.
-- O modal mostra contagem e quantidade de amostras.
-- A calibração limpa o buffer antes e depois.
-- Mantém os limites antigos:
-  - bom `< 0.45`
-  - regular `< 1.10`
-  - ruim `< 2.00`
-  - crítico `>= 2.00`
-- Mantém IndexedDB.
+- A calibração volta a aparecer como popup central/baixo da tela.
+- Não usa mais tela cheia.
+- Mantém contagem de 10 segundos, barra e amostras.
+- Mantém limites antigos e IndexedDB.
 
 URL:
 
-`https://m-martins.github.io/pavimentolab/?v=21-2`
+`https://m-martins.github.io/pavimentolab/?v=21-4`
