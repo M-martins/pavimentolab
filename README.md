@@ -1,21 +1,29 @@
-# PavimentoLab v21.6 IndexedDB
+# PavimentoLab v21.6.1 IndexedDB
 
 ## Versão
 
-v21.6
+v21.6.1
 
 ## Branch
 
-feature/v21.6-popup-calibracao-fixo-mobile
+feature/v21.6.1-corrige-export-modal
 
 ## Pull Request
 
-v21.6 - Fixa popup de calibração no mobile
+v21.6.1 - Corrige popup de exportação ao finalizar
 
 ## Motivo
 
-Mantém o popup de calibração visível e bloqueado durante os 10 segundos no celular, evitando fechamento por eventos de toque, clique fora ou chamadas indevidas de fechamento do modal.
+Restaura a função `showExportModal` chamada após a finalização da gravação, evitando erro ao concluir a coleta.
+
+## Mantido
+
+- popup de calibração fixo no mobile;
+- IndexedDB;
+- limites antigos de classificação;
+- calibração de 10 segundos;
+- mapa, histórico e exportação.
 
 URL:
 
-`https://m-martins.github.io/pavimentolab/?v=21-6`
+`https://m-martins.github.io/pavimentolab/?v=21-6-1`
