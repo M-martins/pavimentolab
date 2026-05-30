@@ -1,4 +1,4 @@
-# PavimentoLab v16 recovery
+# PavimentoLab v17 history finder
 
 Base limpa, sem herança das versões anteriores.
 
@@ -96,3 +96,21 @@ No Android/Chrome isso fica dentro dos dados do app Chrome/PWA. Limpar dados do 
 - `pavimentolab_collections_v16`: histórico ativo.
 - `pavimentolab_current_v16`: rascunho ativo.
 - A v16 tenta migrar automaticamente dados das chaves antigas.
+
+
+## Mudanças da v17
+
+- Adiciona painel "Dados locais" no menu.
+- Varre todo o `localStorage` do domínio em busca de coletas antigas.
+- Detecta listas de coletas, rascunhos e backups JSON.
+- Permite importar coletas encontradas para o histórico atual.
+- Permite exportar backup por chave local encontrada.
+- Migra também dados da v16.
+- A versão da interface passa a mostrar `v17 history finder`.
+
+## Uso recomendado
+
+1. Abra o menu.
+2. Clique em `procurar`.
+3. Se aparecer alguma chave com coletas, clique em `importar`.
+4. Depois use `backup` para salvar uma cópia local.
