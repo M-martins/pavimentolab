@@ -1,30 +1,28 @@
-# PavimentoLab v21.7 IndexedDB
+# PavimentoLab v21.7.1
 
 ## Versão
 
-v21.7
+v21.7.1
 
 ## Branch
 
-feature/v21.7-restaura-qualidade-e-resumo
+feature/v21.7.1-corrige-botoes-dados-locais
 
 ## Pull Request
 
-v21.7 - Restaura qualidade, resumo e histórico
+v21.7.1 - Corrige botões de Dados locais
 
 ## Motivo
 
-Restaura a lógica antiga de qualidade baseada no eixo Z calibrado, volta a alimentar percentuais de qualidade durante a corrida, grava resumo de qualidade no histórico e remove nome fixo do dispositivo na coleta.
+Corrige os botões `importar backup` e `procurar` no painel de Dados locais, adicionando fallback de evento para mobile, feedback visual quando não houver dados antigos e mantendo a lógica de qualidade restaurada da v21.7.
 
-## Impactos avaliados
+## Análise dos registros enviados
 
-- Sensores: volta a armazenar amostras com ax/ay/az.
-- Calibração: volta a calcular azMean/azStd.
-- Classificação: mantém limites fixos 0.45 / 1.10 / 2.00.
-- Histórico: passa a exibir resumo de qualidade por corrida.
-- Exportação: mantém ZIP/CSV/trechos.
-- Dispositivo: nome da coleta deixa de usar motorola_g82 fixo.
+- A coleta de 10,8 km registrou 704 trechos, com 27% bom, 27% regular, 17% ruim e 30% crítico.
+- A coleta de 1,1 km registrou 68 trechos, com 41% bom, 28% regular, 21% ruim e 10% crítico.
+- As duas coletas já gravam resumo de qualidade no histórico.
+- O próximo ponto técnico é calibrar melhor os limiares/ruído, não mexer novamente em UI.
 
 URL:
 
-`https://m-martins.github.io/pavimentolab/?v=21-7`
+`https://m-martins.github.io/pavimentolab/?v=21-7-1`
