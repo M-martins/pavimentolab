@@ -1,28 +1,20 @@
-# PavimentoLab v20 IndexedDB
+# PavimentoLab v20.2 IndexedDB
 
-Versão arquitetural com IndexedDB como armazenamento principal.
+Correção da v20.1:
 
-## O que mudou
+- Versão visível `v20.2`.
+- Mantém IndexedDB como banco principal.
+- Mantém calibração antes de iniciar.
+- Limpa camada de rota ao abrir o app.
+- Recalibra o cálculo de rugosidade usando `baseline_mean`.
+- Reduz sensibilidade da classificação para evitar tudo crítico/vermelho.
+- Mantém mapa limpo e auto-follow.
 
-- O `localStorage` deixa de ser o banco principal.
-- Coletas ficam no IndexedDB.
-- Pontos ficam em uma store própria.
-- Trechos ficam em uma store própria.
-- Histórico é lido do banco local.
-- Exportações carregam os dados do banco sob demanda.
-- Importação de backups antigos converte JSON para IndexedDB.
-- Scanner de dados locais antigos continua disponível.
+## Teste rápido
 
-## Testes recomendados
-
-1. Abrir o app e verificar se o mapa aparece.
-2. Abrir o menu e conferir `Banco local`.
-3. Gravar 1 minuto e parar.
-4. Exportar ZIP.
-5. Importar o backup grande da v14.
-6. Apagar uma coleta de teste.
-7. Fechar o navegador durante uma coleta curta e verificar se há rascunho no banco.
-
-## Branch sugerida
-
-`v20-indexeddb`
+1. Abrir e confirmar `v20.2 indexeddb`.
+2. O mapa não deve abrir com rota antiga desenhada.
+3. Iniciar gravação.
+4. Aguardar calibração.
+5. Rodar trecho curto.
+6. Ver se as cores variam entre verde/amarelo/laranja/vermelho.
