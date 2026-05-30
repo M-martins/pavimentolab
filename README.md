@@ -1,4 +1,4 @@
-# PavimentoLab v17 history finder
+# PavimentoLab v18 data recovery
 
 Base limpa, sem herança das versões anteriores.
 
@@ -114,3 +114,25 @@ No Android/Chrome isso fica dentro dos dados do app Chrome/PWA. Limpar dados do 
 2. Clique em `procurar`.
 3. Se aparecer alguma chave com coletas, clique em `importar`.
 4. Depois use `backup` para salvar uma cópia local.
+
+
+## Mudanças da v18
+
+- Corrige a importação de dados locais encontrados pelo scanner.
+- Adiciona importação de backup JSON.
+- Adiciona centralização automática na localização ao abrir o app.
+- Melhora diagnóstico:
+  - histórico atual
+  - rascunhos locais
+  - tamanho aproximado do localStorage
+  - chave ativa
+- Adiciona botão para limpar rascunhos antigos com confirmação.
+- Melhora deduplicação de coletas importadas.
+- Migra também dados v17.
+
+## Testes recomendados
+
+1. Menu > Dados locais > procurar > importar uma chave antiga.
+2. Verificar se aparece no histórico.
+3. Backup > apagar histórico > importar backup JSON.
+4. Abrir o app e validar se o mapa sai da Sé para a localização atual.
