@@ -4,10 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#06111f" />
-  <title>PavimentoLab v21.2</title>
-  <link rel="manifest" href="./manifest.webmanifest?v=21-2" />
+  <title>PavimentoLab v21.4</title>
+  <link rel="manifest" href="./manifest.webmanifest?v=21-4" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="./styles-v21-2.css?v=21-2" />
+  <link rel="stylesheet" href="./styles-v21-4.css?v=21-4" />
 </head>
 <body>
   <main class="app">
@@ -15,7 +15,7 @@
       <button id="btnMenu" class="icon-btn">☰</button>
       <div>
         <div class="brand">PavimentoLab</div>
-        <div class="version">v21.2 indexeddb · calibração obrigatória</div>
+        <div class="version">v21.4 indexeddb · popup calibração</div>
       </div>
       <div id="statusPill" class="status-pill idle"><span></span><b>Pronto</b></div>
     </header>
@@ -66,7 +66,7 @@
     <aside id="drawer" class="drawer">
       <div class="drawer-panel">
         <div class="drawer-head">
-          <div><h1>PavimentoLab</h1><p>v21.2 indexeddb · calibração obrigatória</p></div>
+          <div><h1>PavimentoLab</h1><p>v21.4 indexeddb · popup calibração</p></div>
           <button id="btnCloseDrawer" class="icon-btn">×</button>
         </div>
 
@@ -124,6 +124,26 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="./app-v21-2.js?v=21-2"></script>
+  <script src="./app-v21-4.js?v=21-4"></script>
+
+  <div id="calibrationOverlay" class="calibration-overlay hidden">
+    <div class="calibration-card">
+      <h2>Calibrando sensores</h2>
+      <p id="calibrationMessage">Mantenha o celular parado na posição de coleta.</p>
+      <div class="calibration-row">
+        <div class="calibration-count" id="calibrationCount">10</div>
+        <div class="calibration-info">
+          <div class="calibration-progress">
+            <div id="calibrationProgress"></div>
+          </div>
+          <small id="calibrationSamples">0 amostras coletadas</small>
+        </div>
+      </div>
+    </div>
+  </div>
+      <small id="calibrationSamples">0 amostras coletadas</small>
+    </div>
+  </div>
+
 </body>
 </html>
