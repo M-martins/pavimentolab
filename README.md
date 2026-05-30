@@ -1,4 +1,4 @@
-# PavimentoLab v18 data recovery
+# PavimentoLab v19 IndexedDB
 
 Base limpa, sem herança das versões anteriores.
 
@@ -136,3 +136,34 @@ No Android/Chrome isso fica dentro dos dados do app Chrome/PWA. Limpar dados do 
 2. Verificar se aparece no histórico.
 3. Backup > apagar histórico > importar backup JSON.
 4. Abrir o app e validar se o mapa sai da Sé para a localização atual.
+
+
+## Mudanças da v19
+
+Primeira versão com arquitetura de banco local:
+
+- Adiciona IndexedDB (`pavimentolab_db`) com stores:
+  - `collections`
+  - `points`
+  - `segments`
+  - `meta`
+- Pontos são salvos em lotes no IndexedDB.
+- Trechos são salvos em lotes no IndexedDB.
+- `localStorage` passa a guardar apenas rascunho leve e histórico leve.
+- Exportações carregam os dados completos do IndexedDB sob demanda.
+- Diagnóstico mostra status do banco local.
+- Recuperação tenta buscar rascunhos também no IndexedDB.
+- Importações de backup passam a salvar também no IndexedDB.
+
+## Atenção
+
+Esta é uma mudança arquitetural grande. Recomendo testar em branch própria:
+
+`feature/v19-indexeddb`
+
+Antes de usar em campo, testar:
+1. gravação curta;
+2. fechamento forçado do navegador durante a coleta;
+3. recuperação;
+4. exportação de ZIP;
+5. importação de backup grande.
