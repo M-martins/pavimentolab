@@ -4,10 +4,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#06111f" />
-  <title>PavimentoLab v15</title>
-  <link rel="manifest" href="./manifest.webmanifest?v=15" />
+  <title>PavimentoLab v16</title>
+  <link rel="manifest" href="./manifest.webmanifest?v=16" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link rel="stylesheet" href="./styles-v15.css?v=15" />
+  <link rel="stylesheet" href="./styles-v16.css?v=16" />
 </head>
 <body>
   <main class="app">
@@ -15,7 +15,7 @@
       <button id="btnMenu" class="icon-btn">☰</button>
       <div>
         <div class="brand">PavimentoLab</div>
-        <div class="version">v15 robust stop</div>
+        <div class="version">v16 recovery</div>
       </div>
       <div id="statusPill" class="status-pill idle"><span></span><b>Pronto</b></div>
     </header>
@@ -66,7 +66,7 @@
     <aside id="drawer" class="drawer">
       <div class="drawer-panel">
         <div class="drawer-head">
-          <div><h1>PavimentoLab</h1><p>v15 robust stop · diagnóstico e histórico</p></div>
+          <div><h1>PavimentoLab</h1><p>v16 recovery · diagnóstico e histórico</p></div>
           <button id="btnCloseDrawer" class="icon-btn">×</button>
         </div>
 
@@ -87,7 +87,7 @@
         </section>
 
         <section class="card">
-          <div class="history-title"><h2>Histórico</h2><button id="btnClearAll">limpar tudo</button></div>
+          <div class="history-title"><h2>Histórico</h2><div class="history-tools"><button id="btnBackupAll">backup</button><button id="btnClearAll">limpar tudo</button></div></div>
           <div id="historyList" class="history-list"></div>
         </section>
       </div>
@@ -113,6 +113,6 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="./app-v15.js?v=15"></script>
+  <script src="./app-v16.js?v=16"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-# PavimentoLab v15 robust stop
+# PavimentoLab v16 recovery
 
 Base limpa, sem herança das versões anteriores.
 
@@ -80,3 +80,19 @@ Chaves principais:
 - `pavimentolab_current_v15`: rascunho da coleta em andamento.
 
 No Android/Chrome isso fica dentro dos dados do app Chrome/PWA. Limpar dados do site, limpar armazenamento do Chrome ou remover dados do app pode apagar as coletas locais.
+
+
+## Mudanças da v16
+
+- Remove o popup `confirm()` de recuperação.
+- Recupera automaticamente coletas não finalizadas e salva no histórico.
+- Migra históricos antigos das versões v12, v13, v14 e v15 para a v16.
+- Remove rascunhos vazios.
+- Adiciona botão `backup` no histórico para exportar todo o armazenamento local em JSON.
+- A versão da interface passa a mostrar `v16 recovery`.
+
+## Chaves locais
+
+- `pavimentolab_collections_v16`: histórico ativo.
+- `pavimentolab_current_v16`: rascunho ativo.
+- A v16 tenta migrar automaticamente dados das chaves antigas.
