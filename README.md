@@ -1,29 +1,21 @@
-# PavimentoLab v21.5 IndexedDB
+# PavimentoLab v21.6 IndexedDB
 
 ## Versão
 
-v21.5
+v21.6
 
 ## Branch
 
-feature/v21.5-calibracao-modal-antiga
+feature/v21.6-popup-calibracao-fixo-mobile
 
 ## Pull Request
 
-v21.5 - Restaura calibração modal antiga
+v21.6 - Fixa popup de calibração no mobile
 
 ## Motivo
 
-Restaura o fluxo antigo de calibração com popup/modal antes da gravação, usando a lógica validada nas versões iniciais: preparar coleta, liberar sensores, calibrar por 10 segundos e só então iniciar a gravação.
-
-## Mantido
-
-- IndexedDB;
-- limites antigos de classificação;
-- calibração de 10 segundos;
-- mapa limpo;
-- histórico e exportação.
+Mantém o popup de calibração visível e bloqueado durante os 10 segundos no celular, evitando fechamento por eventos de toque, clique fora ou chamadas indevidas de fechamento do modal.
 
 URL:
 
-`https://m-martins.github.io/pavimentolab/?v=21-5`
+`https://m-martins.github.io/pavimentolab/?v=21-6`
