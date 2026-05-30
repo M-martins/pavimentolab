@@ -1,7 +1,7 @@
 {
-  "name": "PavimentoLab v21.6.1",
-  "short_name": "PavLab v21.6.1",
-  "start_url": "./index.html?v=21-6-1",
+  "name": "PavimentoLab v21.7",
+  "short_name": "PavLab v21.7",
+  "start_url": "./index.html?v=21-7",
   "display": "standalone",
   "background_color": "#06111f",
   "theme_color": "#06111f",

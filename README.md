@@ -1,29 +1,30 @@
-# PavimentoLab v21.6.1 IndexedDB
+# PavimentoLab v21.7 IndexedDB
 
 ## Versão
 
-v21.6.1
+v21.7
 
 ## Branch
 
-feature/v21.6.1-corrige-export-modal
+feature/v21.7-restaura-qualidade-e-resumo
 
 ## Pull Request
 
-v21.6.1 - Corrige popup de exportação ao finalizar
+v21.7 - Restaura qualidade, resumo e histórico
 
 ## Motivo
 
-Restaura a função `showExportModal` chamada após a finalização da gravação, evitando erro ao concluir a coleta.
+Restaura a lógica antiga de qualidade baseada no eixo Z calibrado, volta a alimentar percentuais de qualidade durante a corrida, grava resumo de qualidade no histórico e remove nome fixo do dispositivo na coleta.
 
-## Mantido
+## Impactos avaliados
 
-- popup de calibração fixo no mobile;
-- IndexedDB;
-- limites antigos de classificação;
-- calibração de 10 segundos;
-- mapa, histórico e exportação.
+- Sensores: volta a armazenar amostras com ax/ay/az.
+- Calibração: volta a calcular azMean/azStd.
+- Classificação: mantém limites fixos 0.45 / 1.10 / 2.00.
+- Histórico: passa a exibir resumo de qualidade por corrida.
+- Exportação: mantém ZIP/CSV/trechos.
+- Dispositivo: nome da coleta deixa de usar motorola_g82 fixo.
 
 URL:
 
-`https://m-martins.github.io/pavimentolab/?v=21-6-1`
+`https://m-martins.github.io/pavimentolab/?v=21-7`
